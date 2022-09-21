@@ -51,7 +51,9 @@ async function list(req, res) {
 }
 
 async function create(req, res, next) {
-  console.log("hello");
+  console.log("received post request");
+  console.log(req);
+
   reservationsService
     .create(req.body.data)
     .then((data) => res.status(201).json({ data }))
@@ -60,5 +62,5 @@ async function create(req, res, next) {
 
 module.exports = {
   list,
-  create: [hasValidFields, create],
+  create: [create],
 };

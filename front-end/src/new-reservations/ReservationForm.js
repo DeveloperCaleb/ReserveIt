@@ -39,9 +39,22 @@ function ReservationForm() {
     });
   };
 
-  const handleSubmit = (event) => {
+  // ! formdata is not being sent with the post request.
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(formData);
+
+    try {
+      const response = await fetch("http://localhost:5001/reservations", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+
     setFormData({ ...initialFormState });
   };
 
@@ -130,5 +143,4 @@ function ReservationForm() {
     </div>
   );
 }
-
 export default ReservationForm;
