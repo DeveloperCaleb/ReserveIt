@@ -1,4 +1,5 @@
 const reservationsService = require("./reservations.service");
+const formatDate = require("../utils/format-date");
 
 /**
  * * - Important information
@@ -45,22 +46,41 @@ function hasValidFields(req, res, next) {
 }
 
 //* Handlers
-async function list(req, res) {
-  const data = await reservationsService.list();
-  res.json({ data });
+async function listReservationsByDate(req, res) {
+  if (req.query.date) {
+    console.log("if");
+    const { date } = req.query;
+    try {
+      const data = await reservationsService.listReservationsByDate(date);
+      res.status(200).json({ data });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json(error);
+    }
+  } else {
+    const date = formatDate();
+
+    try {
+      const data = await reservationsService.listReservationsByDate(date);
+      res.status(200).json({ data });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json(error);
+    }
+  }
 }
 
 async function create(req, res, next) {
-  console.log("received post request");
-  console.log(req);
-
-  reservationsService
-    .create(req.body.data)
-    .then((data) => res.status(201).json({ data }))
-    .catch(next);
+  try {
+    const data = await reservationsService.create(req.body);
+    res.status(201).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(error);
+  }
 }
 
 module.exports = {
-  list,
-  create: [create],
+  listReservationsByDate,
+  create: [hasValidFields, create],
 };

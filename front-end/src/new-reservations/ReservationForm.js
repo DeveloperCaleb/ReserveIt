@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+const axios = require("axios");
 
 /**
  * * - Important information
@@ -9,16 +10,6 @@ import { useHistory } from "react-router-dom";
  */
 
 function ReservationForm() {
-  /*
-  TODO create new form
-    first name
-    last name
-    mobile_number
-    res date
-    res time
-  TODO create on click handler
-  TODO create on change handler
-  */
   const history = useHistory();
 
   let initialFormState = {
@@ -39,23 +30,18 @@ function ReservationForm() {
     });
   };
 
-  // ! formdata is not being sent with the post request.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:5001/reservations", {
-        method: "POST",
-        body: JSON.stringify(formData),
+    await axios
+      .post("http://localhost:5001/reservations", formData)
+      .then(function (response) {
+        console.log(response);
+        setFormData(initialFormState);
+      })
+      .catch(function (error) {
+        console.log(error);
       });
-
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-
-    setFormData({ ...initialFormState });
   };
 
   return (
