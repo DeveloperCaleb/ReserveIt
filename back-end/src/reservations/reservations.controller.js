@@ -30,23 +30,25 @@ const validProperties = [
 ];
 
 function hasValidFields(req, res, next) {
-  const { data = {} } = req.body;
+  const { body = {} } = req;
 
-  const invalidFileds = Object.keys(data).filter(
-    (field) => !validProperties.includes(field)
+  const invalidFileds = validProperties.filter(
+    (field) => !Object.keys(body).includes(field)
   );
 
-  if (invalidFileds.length) {
+  if (invalidFileds.length === 0) {
+    return next();
+  } else {
     return next({
       status: 400,
       message: `Invalid field(s): ${invalidFileds.join(", ")}`,
     });
   }
-  next();
 }
 
 //* Handlers
 async function listReservationsByDate(req, res) {
+  console.log(req.query);
   if (req.query.date) {
     console.log("if");
     const { date } = req.query;
@@ -58,6 +60,7 @@ async function listReservationsByDate(req, res) {
       res.status(400).json(error);
     }
   } else {
+    console.log("else");
     const date = formatDate();
 
     try {
@@ -71,6 +74,8 @@ async function listReservationsByDate(req, res) {
 }
 
 async function create(req, res, next) {
+  // ! returning failed on 1 test even though everything indicates passing. (return a status of 201, it is doing that.)
+
   try {
     const data = await reservationsService.create(req.body);
     res.status(201).json({ data });

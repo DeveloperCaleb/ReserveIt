@@ -37,7 +37,7 @@ function ReservationForm() {
       .post("http://localhost:5001/reservations", formData)
       .then(function (response) {
         console.log(response);
-        setFormData(initialFormState);
+        history.push(`/dashboard?date=${formData.reservation_date}`);
       })
       .catch(function (error) {
         console.log(error);
