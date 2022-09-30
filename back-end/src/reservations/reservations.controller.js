@@ -8,17 +8,6 @@ const formatDate = require("../utils/format-date");
  * TODO - Needs completed
  */
 
-/*
-  TODO create new form
-    first name
-    last name
-    mobile_number
-    res date
-    res time
-  TODO create on click handler
-  TODO create on change handler
-  */
-
 //* Middleware
 const validProperties = [
   "first_name",
@@ -73,12 +62,41 @@ function hasValidDate(req, res, next) {
   const validFormat = /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/gm;
   const { data } = req.body;
 
-  if (data.reservation_date.match(validFormat)) {
+  const selectedDate = data.reservation_date.split("-");
+  const selectedDateFormatted = new Date(
+    selectedDate[0],
+    selectedDate[1] - 1,
+    selectedDate[2]
+  );
+
+  const todaysDate = formatDate().split("-");
+  console.log(todaysDate);
+  const todaysDateFormatted = new Date(
+    todaysDate[0],
+    todaysDate[1] - 1,
+    todaysDate[2]
+  );
+
+  if (
+    data.reservation_date.match(validFormat) &&
+    selectedDateFormatted.getDay() !== 2 &&
+    selectedDateFormatted >= todaysDateFormatted
+  ) {
     return next();
-  } else {
+  } else if (!data.reservation_date.match(validFormat)) {
     return next({
       status: 400,
       message: `Invalid field(s): reservation_date`,
+    });
+  } else if (selectedDateFormatted.getDay() == 2) {
+    return next({
+      status: 400,
+      message: `Invalid date: closed on Tuesdays`,
+    });
+  } else if (selectedDateFormatted < todaysDateFormatted) {
+    return next({
+      status: 400,
+      message: `Invalid date: reservation must be for today or in the future`,
     });
   }
 }

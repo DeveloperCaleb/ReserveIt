@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { today } from "../utils/date-time";
 const axios = require("axios");
 
 /**
@@ -8,6 +9,8 @@ const axios = require("axios");
  * ? - I have a question about this
  * TODO - Needs completed
  */
+
+// TODO After submission make the minimum date require be the current day.
 
 function ReservationForm() {
   const history = useHistory();
@@ -50,6 +53,31 @@ function ReservationForm() {
         console.log(error);
       });
   };
+
+  function dateValidation() {
+    const selectedDate = formData.reservation_date.split("-");
+    const selectedDateFormatted = new Date(
+      selectedDate[0],
+      selectedDate[1] - 1,
+      selectedDate[2]
+    );
+
+    const todaysDate = today().split("-");
+    const todaysDateFormatted = new Date(
+      todaysDate[0],
+      todaysDate[1] - 1,
+      todaysDate[2]
+    );
+
+    if (
+      selectedDateFormatted.getDay() !== 2 &&
+      selectedDateFormatted >= todaysDateFormatted
+    ) {
+      return true;
+    }
+  }
+
+  function timeValidation() {}
 
   return (
     <div>
@@ -128,10 +156,28 @@ function ReservationForm() {
           ></input>
         </label>
         <br />
-        <button type="submit">Submit</button>
-        <button type="button" onClick={() => history.goBack()}>
-          Cancel
-        </button>
+        {dateValidation() ? (
+          <div>
+            {" "}
+            <button type="submit">Submit</button>
+            <button type="button" onClick={() => history.goBack()}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div>
+            {" "}
+            <p className="alert alert-danger">
+              Reservation must be today or in the future. Closed on Tuesday!
+            </p>{" "}
+            <button disabled type="submit">
+              Submit
+            </button>{" "}
+            <button type="button" onClick={() => history.goBack()}>
+              Cancel
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );
