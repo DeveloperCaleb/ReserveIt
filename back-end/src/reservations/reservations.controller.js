@@ -30,27 +30,89 @@ const validProperties = [
 ];
 
 function hasValidFields(req, res, next) {
-  const { body = {} } = req;
+  const { data = {} } = req.body;
 
-  const invalidFileds = validProperties.filter(
-    (field) => !Object.keys(body).includes(field)
+  const bodyKeys = Object.keys(data);
+
+  const invalidFields = validProperties.filter(
+    (field) => !bodyKeys.includes(field)
   );
 
-  if (invalidFileds.length === 0) {
+  if (invalidFields.length === 0) {
     return next();
   } else {
     return next({
       status: 400,
-      message: `Invalid field(s): ${invalidFileds.join(", ")}`,
+      message: `Invalid field(s): ${invalidFields.join(", ")}`,
+    });
+  }
+}
+
+function hasValidEntries(req, res, next) {
+  const { data = {} } = req.body;
+
+  const bodyValues = Object.entries(data);
+
+  const invalidEntries = bodyValues.filter((field) => {
+    if (!field[1] || (field[0] === "people" && typeof field[1] === "string")) {
+      return field[0];
+    }
+  });
+
+  if (invalidEntries.length === 0) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Invalid field(s): ${invalidEntries.join(", ")}`,
+    });
+  }
+}
+
+function hasValidDate(req, res, next) {
+  const validFormat = /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/gm;
+  const { data } = req.body;
+
+  if (data.reservation_date.match(validFormat)) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Invalid field(s): reservation_date`,
+    });
+  }
+}
+
+function hasValidTime(req, res, next) {
+  const validFormat = /^[0-9][0-9]:[0-9][0-9]/gm;
+  const { data } = req.body;
+
+  if (data.reservation_time.match(validFormat)) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Invalid field(s): reservation_time`,
+    });
+  }
+}
+
+function peopleIsANumber(req, res, next) {
+  const { data } = req.body;
+
+  if (!isNaN(data.people)) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: `Invalid field(s): people is not a number`,
     });
   }
 }
 
 //* Handlers
 async function listReservationsByDate(req, res) {
-  console.log(req.query);
   if (req.query.date) {
-    console.log("if");
     const { date } = req.query;
     try {
       const data = await reservationsService.listReservationsByDate(date);
@@ -60,7 +122,6 @@ async function listReservationsByDate(req, res) {
       res.status(400).json(error);
     }
   } else {
-    console.log("else");
     const date = formatDate();
 
     try {
@@ -74,10 +135,8 @@ async function listReservationsByDate(req, res) {
 }
 
 async function create(req, res, next) {
-  // ! returning failed on 1 test even though everything indicates passing. (return a status of 201, it is doing that.)
-
   try {
-    const data = await reservationsService.create(req.body);
+    const data = await reservationsService.create(req.body.data);
     res.status(201).json({ data });
   } catch (error) {
     console.error(error);
@@ -87,5 +146,12 @@ async function create(req, res, next) {
 
 module.exports = {
   listReservationsByDate,
-  create: [hasValidFields, create],
+  create: [
+    hasValidFields,
+    hasValidEntries,
+    hasValidDate,
+    hasValidTime,
+    peopleIsANumber,
+    create,
+  ],
 };

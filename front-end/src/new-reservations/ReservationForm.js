@@ -24,17 +24,24 @@ function ReservationForm() {
   const [formData, setFormData] = useState({ ...initialFormState });
 
   const handleChange = ({ target }) => {
-    setFormData({
-      ...formData,
-      [target.name]: target.value,
-    });
+    if (target.name === "people") {
+      setFormData({
+        ...formData,
+        [target.name]: parseInt(target.value),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [target.name]: target.value,
+      });
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     await axios
-      .post("http://localhost:5001/reservations", formData)
+      .post("http://localhost:5001/reservations", { data: formData })
       .then(function (response) {
         console.log(response);
         history.push(`/dashboard?date=${formData.reservation_date}`);
