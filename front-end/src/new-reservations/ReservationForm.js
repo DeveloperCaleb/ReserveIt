@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { today } from "../utils/date-time";
+import DateError from "./DateError";
+import TimeError from "./TimeError";
 const axios = require("axios");
 
 /**
@@ -77,7 +79,50 @@ function ReservationForm() {
     }
   }
 
-  function timeValidation() {}
+  function timeValidation() {
+    const selectedTime = formData.reservation_time.split(":");
+    const date = new Date();
+    const hour = date.getHours();
+    const minutes = date.getMinutes();
+
+    if (
+      parseInt(selectedTime[0]) < 10 ||
+      (parseInt(selectedTime[0]) <= 10 && parseInt(selectedTime[1]) < 30)
+    ) {
+      return "early";
+    } else if (
+      parseInt(selectedTime[0]) > 21 ||
+      (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) >= 30)
+    ) {
+      return "late";
+    } else if (
+      parseInt(selectedTime[0]) <= hour ||
+      (parseInt(selectedTime[0]) <= hour &&
+        parseInt(selectedTime[1]) <= minutes)
+    ) {
+      return "past";
+    }
+
+    return true;
+  }
+
+  function validation() {
+    if (dateValidation() && timeValidation() === true) {
+      return (
+        <div>
+          {" "}
+          <button type="submit">Submit</button>
+          <button type="button" onClick={() => history.goBack()}>
+            Cancel
+          </button>
+        </div>
+      );
+    } else if (!dateValidation()) {
+      return <DateError />;
+    } else if (timeValidation() !== true) {
+      return <TimeError error={timeValidation()} />;
+    }
+  }
 
   return (
     <div>
@@ -156,30 +201,10 @@ function ReservationForm() {
           ></input>
         </label>
         <br />
-        {dateValidation() ? (
-          <div>
-            {" "}
-            <button type="submit">Submit</button>
-            <button type="button" onClick={() => history.goBack()}>
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <div>
-            {" "}
-            <p className="alert alert-danger">
-              Reservation must be today or in the future. Closed on Tuesday!
-            </p>{" "}
-            <button disabled type="submit">
-              Submit
-            </button>{" "}
-            <button type="button" onClick={() => history.goBack()}>
-              Cancel
-            </button>
-          </div>
-        )}
+        {validation()}
       </form>
     </div>
   );
 }
+
 export default ReservationForm;

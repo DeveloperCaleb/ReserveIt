@@ -1,4 +1,4 @@
-function formatDate() {
+function today() {
   const d = new Date();
   let month = "" + (d.getMonth() + 1);
   let day = "" + d.getDate();
@@ -11,4 +11,4 @@ function formatDate() {
   return [year, month, day].join("-");
 }
 
-module.exports = formatDate;
+module.exports = today;

@@ -1,5 +1,5 @@
 const reservationsService = require("./reservations.service");
-const formatDate = require("../utils/format-date");
+const today = require("../utils/today");
 
 /**
  * * - Important information
@@ -69,8 +69,7 @@ function hasValidDate(req, res, next) {
     selectedDate[2]
   );
 
-  const todaysDate = formatDate().split("-");
-  console.log(todaysDate);
+  const todaysDate = today().split("-");
   const todaysDateFormatted = new Date(
     todaysDate[0],
     todaysDate[1] - 1,
@@ -140,7 +139,7 @@ async function listReservationsByDate(req, res) {
       res.status(400).json(error);
     }
   } else {
-    const date = formatDate();
+    const date = today();
 
     try {
       const data = await reservationsService.listReservationsByDate(date);
