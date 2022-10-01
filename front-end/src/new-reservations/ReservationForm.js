@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { today } from "../utils/date-time";
-import DateError from "./DateError";
-import TimeError from "./TimeError";
 const axios = require("axios");
 
 /**
@@ -27,6 +25,7 @@ function ReservationForm() {
   };
 
   const [formData, setFormData] = useState({ ...initialFormState });
+  const [error, setError] = useState("");
 
   const handleChange = ({ target }) => {
     if (target.name === "people") {
@@ -45,15 +44,21 @@ function ReservationForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    await axios
-      .post("http://localhost:5001/reservations", { data: formData })
-      .then(function (response) {
-        console.log(response);
-        history.push(`/dashboard?date=${formData.reservation_date}`);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    if (!dateValidation()) {
+      return;
+    } else if (!timeValidation()) {
+      return;
+    } else {
+      await axios
+        .post("http://localhost:5001/reservations", { data: formData })
+        .then(function (response) {
+          console.log(response);
+          history.push(`/dashboard?date=${formData.reservation_date}`);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   };
 
   function dateValidation() {
@@ -76,11 +81,16 @@ function ReservationForm() {
       selectedDateFormatted >= todaysDateFormatted
     ) {
       return true;
+    } else {
+      return setError(
+        "Reservation must be today or in the future. Closed on Tuesday!"
+      );
     }
   }
 
   function timeValidation() {
     const selectedTime = formData.reservation_time.split(":");
+
     const date = new Date();
     const hour = date.getHours();
     const minutes = date.getMinutes();
@@ -89,39 +99,21 @@ function ReservationForm() {
       parseInt(selectedTime[0]) < 10 ||
       (parseInt(selectedTime[0]) <= 10 && parseInt(selectedTime[1]) < 30)
     ) {
-      return "early";
+      return setError("Not opened until 10:30AM!");
     } else if (
       parseInt(selectedTime[0]) > 21 ||
-      (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) >= 30)
+      (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) > 29)
     ) {
-      return "late";
+      return setError("Too soon to closing. Closed at 10:30PM!");
     } else if (
       parseInt(selectedTime[0]) <= hour ||
       (parseInt(selectedTime[0]) <= hour &&
         parseInt(selectedTime[1]) <= minutes)
     ) {
-      return "past";
+      return setError(" Reservation must be in the future!");
     }
 
     return true;
-  }
-
-  function validation() {
-    if (dateValidation() && timeValidation() === true) {
-      return (
-        <div>
-          {" "}
-          <button type="submit">Submit</button>
-          <button type="button" onClick={() => history.goBack()}>
-            Cancel
-          </button>
-        </div>
-      );
-    } else if (!dateValidation()) {
-      return <DateError />;
-    } else if (timeValidation() !== true) {
-      return <TimeError error={timeValidation()} />;
-    }
   }
 
   return (
@@ -201,8 +193,17 @@ function ReservationForm() {
           ></input>
         </label>
         <br />
-        {validation()}
+        <div>
+          {" "}
+          <button type="submit">Submit</button>
+          <button type="button" onClick={() => history.goBack()}>
+            Cancel
+          </button>
+        </div>
       </form>
+      <p className={error !== "" ? "alert alert-danger" : ""}>
+        {error !== ""} {error}
+      </p>
     </div>
   );
 }

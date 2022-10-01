@@ -104,14 +104,44 @@ function hasValidTime(req, res, next) {
   const validFormat = /^[0-9][0-9]:[0-9][0-9]/gm;
   const { data } = req.body;
 
-  if (data.reservation_time.match(validFormat)) {
-    return next();
-  } else {
+  const selectedTime = data.reservation_time.split(":");
+
+  const date = new Date();
+  const hour = date.getHours();
+  const minutes = date.getMinutes();
+
+  if (!data.reservation_time.match(validFormat)) {
     return next({
       status: 400,
       message: `Invalid field(s): reservation_time`,
     });
+  } else if (
+    parseInt(selectedTime[0]) < 10 ||
+    (parseInt(selectedTime[0]) <= 10 && parseInt(selectedTime[1]) < 30)
+  ) {
+    return next({
+      status: 400,
+      message: "Not opened until 10:30AM!",
+    });
+  } else if (
+    parseInt(selectedTime[0]) > 21 ||
+    (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) > 29)
+  ) {
+    return next({
+      status: 400,
+      message: "Too soon to closing. Closed at 10:30PM!",
+    });
+  } else if (
+    parseInt(selectedTime[0]) <= hour ||
+    (parseInt(selectedTime[0]) <= hour && parseInt(selectedTime[1]) <= minutes)
+  ) {
+    return next({
+      status: 400,
+      message: "Reservation must be in the future!",
+    });
   }
+
+  return true;
 }
 
 function peopleIsANumber(req, res, next) {
