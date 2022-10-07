@@ -62,20 +62,10 @@ function hasValidData(req, res, next) {
     todaysDate[2]
   );
 
-  const selectedTime = data.reservation_time.split(":");
-  const selectedHours = selectedTime[0];
-  const selectedMinutes = selectedTime[1];
+  const selectedTime = data.reservation_time;
 
   const currentTime = new Date();
-
-  /*
-  TODO This format works and will create less variables and be easier to read.
   const currentTimeFormatted = `${currentTime.getHours()}:${currentTime.getMinutes()}`;
-  console.log(data.reservation_time > currentTimeFormatted);
-  */
-
-  const currentHours = currentTime.getHours();
-  const currentMinutes = currentTime.getMinutes();
 
   for (const [key, value] of Object.entries(data)) {
     validate(errors, key, () => !value);
@@ -89,24 +79,13 @@ function hasValidData(req, res, next) {
           selectedDateFormatted.getDay() == 2 ||
           selectedDateFormatted < todaysDateFormatted)
     );
-    validate(errors, key, () => !data.reservation_time.match(validTimeFormat));
+    validate(errors, key, () => !selectedTime.match(validTimeFormat));
+    validate(errors, key, () => selectedTime < "10:30");
+    validate(errors, key, () => selectedTime > "21:29");
     validate(
       errors,
       key,
-      () => selectedHours < 10 || (selectedHours <= 10 && selectedMinutes < 30)
-    );
-    validate(
-      errors,
-      key,
-      () => selectedHours > 21 || (selectedHours >= 21 && selectedMinutes > 29)
-    );
-    validate(
-      errors,
-      key,
-      () =>
-        selectedDate === todaysDate &&
-        (selectedHours <= currentHours ||
-          (selectedHours <= currentHours && selectedMinutes <= currentMinutes))
+      () => selectedDate === todaysDate && selectedTime < currentTimeFormatted
     );
   }
 

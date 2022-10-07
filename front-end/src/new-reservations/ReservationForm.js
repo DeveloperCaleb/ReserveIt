@@ -43,25 +43,64 @@ function ReservationForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const valid = validation();
 
-    if (!dateValidation()) {
+    try {
+      if (valid) {
+        await axios
+          .post("http://localhost:5001/reservations", { data: formData })
+          .then(function (response) {
+            console.log(response);
+            history.push(`/dashboard?date=${formData.reservation_date}`);
+          });
+      }
+    } catch (error) {
+      console.log(error);
       return;
-    } else if (!timeValidation()) {
-      return;
-    } else {
-      await axios
-        .post("http://localhost:5001/reservations", { data: formData })
-        .then(function (response) {
-          console.log(response);
-          history.push(`/dashboard?date=${formData.reservation_date}`);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     }
   };
 
-  function dateValidation() {
+  function validation() {
+    const selectedDate = formData.reservation_date.split("-");
+
+    const selectedDateFormatted = new Date(
+      selectedDate[0],
+      selectedDate[1] - 1,
+      selectedDate[2]
+    );
+
+    const todaysDate = today().split("-");
+
+    const todaysDateFormatted = new Date(
+      todaysDate[0],
+      todaysDate[1] - 1,
+      todaysDate[2]
+    );
+
+    const selectedTime = formData.reservation_time;
+
+    const currentTime = new Date();
+
+    const currentTimeFormatted = `${currentTime.getHours()}:${currentTime.getMinutes()}`;
+
+    if (
+      selectedDateFormatted.getDay() === 2 ||
+      selectedDateFormatted < todaysDateFormatted
+    ) {
+      return setError(
+        "Reservation must be today or in the future. Closed on Tuesday!"
+      );
+    } else if (selectedTime < "10:30") {
+      return setError("Not opened until 10:30AM!");
+    } else if (selectedTime > "21:29") {
+      return setError("Too soon to closing. Closed at 10:30PM!");
+    } else if (todaysDate && selectedTime < currentTimeFormatted) {
+      return setError(" Reservation must be in the future!");
+    }
+    return true;
+  }
+
+  /*function dateValidation() {
     const selectedDate = formData.reservation_date.split("-");
     const selectedDateFormatted = new Date(
       selectedDate[0],
@@ -114,7 +153,7 @@ function ReservationForm() {
     }
 
     return true;
-  }
+  }*/
 
   return (
     <div>
