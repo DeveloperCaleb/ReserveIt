@@ -1,8 +1,8 @@
 import React from "react";
 import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
 function ReservationCards({ reservations }) {
-  // console.log("res", reservations.reservations[0].first_name);
   const reservationCards = reservations.map((res, index) => {
     return (
       <Card>
@@ -13,6 +13,9 @@ function ReservationCards({ reservations }) {
           <p> Mobile: {res.mobile_number}</p>
           <p>Reservation Time: {res.reservation_time}</p>
           <p>Party Size: {res.people}</p>
+          <a href={`/reservations/${res.reservation_id}/seat`}>
+            <Button>Seat</Button>
+          </a>
         </Card.Body>
       </Card>
     );

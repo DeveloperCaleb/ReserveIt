@@ -1,5 +1,6 @@
 const reservationsService = require("./reservations.service");
 const today = require("../utils/today");
+const validate = require("../utils/validate");
 
 /**
  * * - Important information
@@ -19,25 +20,113 @@ const validProperties = [
 ];
 
 function hasValidFields(req, res, next) {
-  const { data = {} } = req.body;
+  const { data } = req.body;
 
-  const bodyKeys = Object.keys(data);
+  if (!data) {
+    return next({
+      status: 400,
+      message: `Missing Data`,
+    });
+  }
 
-  const invalidFields = validProperties.filter(
-    (field) => !bodyKeys.includes(field)
-  );
+  const keys = Object.keys(data);
 
-  if (invalidFields.length === 0) {
-    return next();
-  } else {
+  const invalidFields = validProperties.filter((key) => !keys.includes(key));
+
+  if (invalidFields.length > 0) {
     return next({
       status: 400,
       message: `Invalid field(s): ${invalidFields.join(", ")}`,
     });
   }
+  return next();
 }
 
-function hasValidEntries(req, res, next) {
+function hasValidData(req, res, next) {
+  const { data = {} } = req.body;
+  const errors = new Set();
+  const validDateFormat = /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/gm;
+  const validTimeFormat = /^[0-9][0-9]:[0-9][0-9]/gm;
+
+  const selectedDate = data.reservation_date.split("-");
+  const selectedDateFormatted = new Date(
+    selectedDate[0],
+    selectedDate[1] - 1,
+    selectedDate[2]
+  );
+
+  const todaysDate = today().split("-");
+  const todaysDateFormatted = new Date(
+    todaysDate[0],
+    todaysDate[1] - 1,
+    todaysDate[2]
+  );
+
+  const selectedTime = data.reservation_time.split(":");
+  const selectedHours = selectedTime[0];
+  const selectedMinutes = selectedTime[1];
+
+  const currentTime = new Date();
+
+  /*
+  TODO This format works and will create less variables and be easier to read.
+  const currentTimeFormatted = `${currentTime.getHours()}:${currentTime.getMinutes()}`;
+  console.log(data.reservation_time > currentTimeFormatted);
+  */
+
+  const currentHours = currentTime.getHours();
+  const currentMinutes = currentTime.getMinutes();
+
+  for (const [key, value] of Object.entries(data)) {
+    validate(errors, key, () => !value);
+    validate(errors, key, () => key === "people" && typeof value !== "number");
+    validate(
+      errors,
+      key,
+      () =>
+        key === "reservation_date" &&
+        (!data.reservation_date.match(validDateFormat) ||
+          selectedDateFormatted.getDay() == 2 ||
+          selectedDateFormatted < todaysDateFormatted)
+    );
+    validate(errors, key, () => !data.reservation_time.match(validTimeFormat));
+    validate(
+      errors,
+      key,
+      () => selectedHours < 10 || (selectedHours <= 10 && selectedMinutes < 30)
+    );
+    validate(
+      errors,
+      key,
+      () => selectedHours > 21 || (selectedHours >= 21 && selectedMinutes > 29)
+    );
+    validate(
+      errors,
+      key,
+      () =>
+        selectedDate === todaysDate &&
+        (selectedHours <= currentHours ||
+          (selectedHours <= currentHours && selectedMinutes <= currentMinutes))
+    );
+  }
+
+  if (errors.has("reservation_date")) {
+    return next({
+      status: 400,
+      message: `Invalid field(s): ${Array.from(
+        errors
+      )}. Date must be in the future, closed on Tuesday's`,
+    });
+  } else if (errors.size > 0) {
+    return next({
+      status: 400,
+      message: `Invalid field(s): ${Array.from(errors)}`,
+    });
+  }
+  return next();
+}
+
+/*function hasValidEntries(req, res, next) {
   const { data = {} } = req.body;
 
   const bodyValues = Object.entries(data);
@@ -56,13 +145,14 @@ function hasValidEntries(req, res, next) {
       message: `Invalid field(s): ${invalidEntries.join(", ")}`,
     });
   }
-}
+}*/
 
-function hasValidDate(req, res, next) {
+/*function hasValidDate(req, res, next) {
   const validFormat = /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/gm;
   const { data } = req.body;
 
   const selectedDate = data.reservation_date.split("-");
+
   const selectedDateFormatted = new Date(
     selectedDate[0],
     selectedDate[1] - 1,
@@ -98,9 +188,9 @@ function hasValidDate(req, res, next) {
       message: `Invalid date: reservation must be for today or in the future`,
     });
   }
-}
+}*/
 
-function hasValidTime(req, res, next) {
+/*function hasValidTime(req, res, next) {
   const validFormat = /^[0-9][0-9]:[0-9][0-9]/gm;
   const { data } = req.body;
 
@@ -141,10 +231,10 @@ function hasValidTime(req, res, next) {
     });
   }
 
-  return true;
-}
+  return next();
+}*/
 
-function peopleIsANumber(req, res, next) {
+/*function peopleIsANumber(req, res, next) {
   const { data } = req.body;
 
   if (!isNaN(data.people)) {
@@ -155,7 +245,7 @@ function peopleIsANumber(req, res, next) {
       message: `Invalid field(s): people is not a number`,
     });
   }
-}
+}*/
 
 //* Handlers
 async function listReservationsByDate(req, res) {
@@ -193,12 +283,5 @@ async function create(req, res, next) {
 
 module.exports = {
   listReservationsByDate,
-  create: [
-    hasValidFields,
-    hasValidEntries,
-    hasValidDate,
-    hasValidTime,
-    peopleIsANumber,
-    create,
-  ],
+  create: [hasValidFields, hasValidData, create],
 };

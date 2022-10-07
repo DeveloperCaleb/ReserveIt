@@ -1,0 +1,20 @@
+[
+  { "table_name": "A1", "capacity": 1, "reservation_id": 2 },
+  { "table_name": "A2", "capacity": 2 },
+  { "table_name": "A3", "capacity": 3, "reservation_id": 6 },
+  { "table_name": "A4", "capacity": 4 },
+  { "table_name": "A5", "capacity": 5 },
+  { "table_name": "A6", "capacity": 6 },
+  { "table_name": "B1", "capacity": 1, "reservation_id": 3 },
+  { "table_name": "B2", "capacity": 2 },
+  { "table_name": "B3", "capacity": 3 },
+  { "table_name": "B4", "capacity": 4 },
+  { "table_name": "B5", "capacity": 5 },
+  { "table_name": "B6", "capacity": 6 },
+  { "table_name": "C1", "capacity": 1 },
+  { "table_name": "C2", "capacity": 2 },
+  { "table_name": "C3", "capacity": 3 },
+  { "table_name": "C4", "capacity": 4 },
+  { "table_name": "C5", "capacity": 5 },
+  { "table_name": "C6", "capacity": 6 }
+]

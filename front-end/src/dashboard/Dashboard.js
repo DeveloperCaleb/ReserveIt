@@ -5,6 +5,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
 import { today, next, previous } from "../utils/date-time";
 import ReservationCards from "./ReservationCards";
+import Tables from "./Tables";
 
 /**
  * * - Important information
@@ -43,7 +44,18 @@ function Dashboard({ date, setDate }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
 
-  useEffect(getReservations, [date]);
+  useEffect(() => {
+    async function getReservations() {
+      await axios
+        .get(`http://localhost:5001/reservations?date=${date}`)
+        .then((response) => {
+          return setReservations(response.data.data);
+        })
+        .catch((e) => console.log(e));
+    }
+
+    getReservations();
+  }, [date]);
 
   /*
   * Component was originally rendered using this provided function
@@ -58,15 +70,6 @@ function Dashboard({ date, setDate }) {
   *  return () => abortController.abort();
   }
 */
-
-  async function getReservations() {
-    await axios
-      .get(`http://localhost:5001/reservations?date=${date}`)
-      .then((response) => {
-        return setReservations(response.data.data);
-      })
-      .catch((e) => console.log(e));
-  }
 
   /*
   ? I dont feel like I need to push to history and setDate for this page 
@@ -104,6 +107,8 @@ function Dashboard({ date, setDate }) {
       ) : (
         "No Reservations"
       )}
+      <h4>Tables</h4>
+      <Tables />
       <ErrorAlert error={reservationsError} />
     </main>
   );
