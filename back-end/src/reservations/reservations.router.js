@@ -12,4 +12,6 @@ router
   .get(controller.listReservationsByDate)
   .post(controller.create);
 
+router.route("/:reservation_Id").get(controller.getReservation);
+
 module.exports = router;

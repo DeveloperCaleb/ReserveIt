@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
 import ReservationForm from "../new-reservations/ReservationForm";
 import TableForm from "../new-table/TableForm";
+import SeatingForm from "../seating/SeatingForm";
 import { today } from "../utils/date-time";
 import NotFound from "./NotFound";
+import axios from "axios";
 
 /**
  * Defines all the routes for the application.
@@ -33,6 +34,9 @@ function Routes() {
       </Route>
       <Route path="/tables/new">
         <TableForm />
+      </Route>
+      <Route path="/reservations/:reservation_id/seat">
+        <SeatingForm />
       </Route>
       <Route>
         <NotFound />

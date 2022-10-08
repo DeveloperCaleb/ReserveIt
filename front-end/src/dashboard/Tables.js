@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Card from "react-bootstrap/Card";
+import axios from "axios";
 
 function Tables() {
   const [tables, setTables] = useState([]);
 
   useEffect(() => {
     async function getTables() {
-      await axios
-        .get(`http://localhost:5001/tables`)
-        .then((response) => {
-          return setTables(response.data.data);
-        })
-        .catch((e) => console.log(e));
+      try {
+        await axios
+          .get(`http://localhost:5001/tables`)
+          .then((response) => setTables(response.data.data));
+      } catch (e) {
+        console.error(e);
+      }
     }
     getTables();
   }, []);

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import { useHistory, useLocation } from "react-router-dom";
 import ErrorAlert from "../layout/ErrorAlert";
-import { today, next, previous } from "../utils/date-time";
+import { next, previous, today } from "../utils/date-time";
 import ReservationCards from "./ReservationCards";
 import Tables from "./Tables";
 
@@ -43,6 +43,27 @@ function Dashboard({ date, setDate }) {
 
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [tables, setTables] = useState([]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    async function getTables() {
+      try {
+        await axios
+          .get(`http://localhost:5001/tables`, {
+            signal: abortController.signal,
+          })
+          .then((response) => setTables(response.data.data));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    getTables();
+    return () => {
+      console.log("cleanup");
+      abortController.abort(); // Cancels any pending request or response
+    };
+  }, []);
 
   useEffect(() => {
     async function getReservations() {

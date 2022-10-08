@@ -41,25 +41,6 @@ function ReservationForm() {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const valid = validation();
-
-    try {
-      if (valid) {
-        await axios
-          .post("http://localhost:5001/reservations", { data: formData })
-          .then(function (response) {
-            console.log(response);
-            history.push(`/dashboard?date=${formData.reservation_date}`);
-          });
-      }
-    } catch (error) {
-      console.log(error);
-      return;
-    }
-  };
-
   function validation() {
     const selectedDate = formData.reservation_date.split("-");
 
@@ -94,11 +75,31 @@ function ReservationForm() {
       return setError("Not opened until 10:30AM!");
     } else if (selectedTime > "21:29") {
       return setError("Too soon to closing. Closed at 10:30PM!");
-    } else if (todaysDate && selectedTime < currentTimeFormatted) {
+    } else if (
+      selectedDate === todaysDate &&
+      selectedTime < currentTimeFormatted
+    ) {
       return setError(" Reservation must be in the future!");
     }
     return true;
   }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      if (validation()) {
+        await axios
+          .post("http://localhost:5001/reservations", { data: formData })
+          .then(function (response) {
+            console.log(response);
+            history.push(`/dashboard?date=${formData.reservation_date}`);
+          });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   /*function dateValidation() {
     const selectedDate = formData.reservation_date.split("-");

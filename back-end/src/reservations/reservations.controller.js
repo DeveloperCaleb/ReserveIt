@@ -260,7 +260,24 @@ async function create(req, res, next) {
   }
 }
 
+async function getReservation(req, res, next) {
+  const { reservation_Id } = req.params;
+  try {
+    const response = await reservationsService.getReservation(reservation_Id);
+    const data = response[0];
+    if (!data) {
+      throw `Reservation with the Id ${reservation_Id} does not exist.`;
+    } else {
+      res.status(200).json({ data });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({ error });
+  }
+}
+
 module.exports = {
   listReservationsByDate,
   create: [hasValidFields, hasValidData, create],
+  getReservation,
 };

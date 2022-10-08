@@ -1,5 +1,6 @@
 const tablesService = require("./tables.service");
 const validate = require("../utils/validate");
+const { table } = require("../db/connection");
 
 //middleware
 
@@ -52,6 +53,50 @@ function hasValidData(req, res, next) {
   return next();
 }
 
+async function isValidReservation(req, res, next) {
+  const { data } = req.body;
+
+  try {
+    const response = await tablesService.getReservation(data.reservation_id);
+    res.locals.reservation = response[0];
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (!data || !data.reservation_id) {
+    return next({
+      status: 400,
+      message: `Invalid field(s): reservation_id}`,
+    });
+  } else if (!res.locals.reservation) {
+    return next({
+      status: 404,
+      message: `Invalid field(s): ${data.reservation_id} doesn't exist.}`,
+    });
+  }
+  return next();
+}
+
+async function validCapacity(req, res, next) {
+  const { table_id } = req.params;
+  const reservation = res.locals.reservation;
+  const table = await tablesService
+    .getTable(table_id)
+    .then((response) => response[0]);
+
+  if (
+    table === [] ||
+    table.reservation_id !== null ||
+    table.capacity < reservation.people
+  ) {
+    return next({
+      status: 400,
+      message: `Invalid field(s): Table doesn't exist, capacity is too small, or is occupied.}`,
+    });
+  }
+  return next();
+}
+
 //route handlers
 async function list(req, res, next) {
   const data = await tablesService.list();
@@ -68,7 +113,20 @@ async function create(req, res, next) {
   }
 }
 
+async function update(req, res, next) {
+  const { table_id } = req.params;
+  const { reservation_id } = req.body.data;
+  try {
+    const data = await tablesService.update(table_id, reservation_id);
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json(error);
+  }
+}
+
 module.exports = {
   list,
-  create: [hasValidData, create],
+  create: [hasValidFields, hasValidData, create],
+  update: [isValidReservation, validCapacity, update],
 };
