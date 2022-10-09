@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Card from "react-bootstrap/Card";
 import axios from "axios";
+import { useHistory } from "react-router-dom";
 
 function Tables() {
+  const history = useHistory();
   const [tables, setTables] = useState([]);
 
   useEffect(() => {
@@ -18,6 +20,25 @@ function Tables() {
     getTables();
   }, []);
 
+  const handleClick = async (event) => {
+    event.preventDefault();
+
+    const tableId = event.target.value;
+
+    if (
+      window.confirm(
+        "Is this table ready to seat new guests? This cannot be undone."
+      )
+    ) {
+      try {
+        await axios.delete(`http://localhost:5001/tables/${tableId}/seat`);
+        history.go(0);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   const tableCards = tables.map((table, index) => {
     return (
       <div>
@@ -28,6 +49,14 @@ function Tables() {
               <p> Capacity {table.capacity}</p>
               <p data-table-id-status={table.table_id}>Occupied</p>
             </Card.Body>
+            <button
+              type="button"
+              onClick={handleClick}
+              data-table-id-finish={table.table_id}
+              value={table.table_id}
+            >
+              Finished
+            </button>
           </Card>
         ) : (
           <Card className="bg-success">
@@ -36,6 +65,14 @@ function Tables() {
               <p> Capacity {table.capacity}</p>
               <p data-table-id-status={table.table_id}>Free</p>
             </Card.Body>
+            <button
+              type="button"
+              onClick={handleClick}
+              data-table-id-finish={table.table_id}
+              value={table.table_id}
+            >
+              Finished
+            </button>
           </Card>
         )}
       </div>

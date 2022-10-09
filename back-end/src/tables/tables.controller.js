@@ -97,6 +97,26 @@ async function validCapacity(req, res, next) {
   return next();
 }
 
+async function tableExistsAndHasReservation(req, res, next) {
+  const { table_id } = req.params;
+  const table = await tablesService
+    .getTable(table_id)
+    .then((response) => response[0]);
+
+  if (!table) {
+    return next({
+      status: 404,
+      message: `Table ${table_id} does not exist.`,
+    });
+  } else if (table.reservation_id === null) {
+    return next({
+      status: 400,
+      message: `not occupied`,
+    });
+  }
+  return next();
+}
+
 //route handlers
 async function list(req, res, next) {
   const data = await tablesService.list();
@@ -125,8 +145,16 @@ async function update(req, res, next) {
   }
 }
 
+async function updateReservationId(req, res, next) {
+  const { table_id } = req.params;
+  console.log(table_id);
+  await tablesService.updateReservationId(table_id);
+  res.sendStatus(200);
+}
+
 module.exports = {
   list,
   create: [hasValidFields, hasValidData, create],
   update: [isValidReservation, validCapacity, update],
+  delete: [tableExistsAndHasReservation, updateReservationId],
 };

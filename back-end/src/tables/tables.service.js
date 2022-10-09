@@ -28,4 +28,19 @@ function getTable(table_id) {
   return knex("tables").select("*").where({ table_id: table_id });
 }
 
-module.exports = { list, create, update, getReservation, getTable };
+//I can't just delete a single column value
+function updateReservationId(table_id) {
+  return knex("tables")
+    .select("reservation_id")
+    .where({ table_id })
+    .update({ reservation_id: null });
+}
+
+module.exports = {
+  list,
+  create,
+  update,
+  getReservation,
+  getTable,
+  updateReservationId,
+};
