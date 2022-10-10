@@ -10,8 +10,6 @@ const axios = require("axios");
  * TODO - Needs completed
  */
 
-// TODO After submission make the minimum date require be the current day.
-
 function ReservationForm() {
   const history = useHistory();
 
@@ -100,61 +98,6 @@ function ReservationForm() {
       console.log(error);
     }
   };
-
-  /*function dateValidation() {
-    const selectedDate = formData.reservation_date.split("-");
-    const selectedDateFormatted = new Date(
-      selectedDate[0],
-      selectedDate[1] - 1,
-      selectedDate[2]
-    );
-
-    const todaysDate = today().split("-");
-    const todaysDateFormatted = new Date(
-      todaysDate[0],
-      todaysDate[1] - 1,
-      todaysDate[2]
-    );
-
-    if (
-      selectedDateFormatted.getDay() !== 2 &&
-      selectedDateFormatted >= todaysDateFormatted
-    ) {
-      return true;
-    } else {
-      return setError(
-        "Reservation must be today or in the future. Closed on Tuesday!"
-      );
-    }
-  }
-
-  function timeValidation() {
-    const selectedTime = formData.reservation_time.split(":");
-
-    const date = new Date();
-    const hour = date.getHours();
-    const minutes = date.getMinutes();
-
-    if (
-      parseInt(selectedTime[0]) < 10 ||
-      (parseInt(selectedTime[0]) <= 10 && parseInt(selectedTime[1]) < 30)
-    ) {
-      return setError("Not opened until 10:30AM!");
-    } else if (
-      parseInt(selectedTime[0]) > 21 ||
-      (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) > 29)
-    ) {
-      return setError("Too soon to closing. Closed at 10:30PM!");
-    } else if (
-      parseInt(selectedTime[0]) <= hour ||
-      (parseInt(selectedTime[0]) <= hour &&
-        parseInt(selectedTime[1]) <= minutes)
-    ) {
-      return setError(" Reservation must be in the future!");
-    }
-
-    return true;
-  }*/
 
   return (
     <div>

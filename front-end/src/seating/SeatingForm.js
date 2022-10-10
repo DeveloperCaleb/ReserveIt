@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router";
-import Form from "react-bootstrap/Form";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+import Form from "react-bootstrap/Form";
+import { useHistory, useParams } from "react-router";
 
 function SeatingForm() {
   const history = useHistory();

@@ -18,52 +18,16 @@ import Tables from "./Tables";
  * Defines the dashboard page.
  * @returns {JSX.Element}
  */
-function Dashboard({ date, setDate }) {
+function Dashboard() {
   const { search } = useLocation();
   const history = useHistory();
 
-  /* 
-  ? I want my page to render based on the date in the query string 
-  ? but want it to be current day by default if no query is provided. 
-  ? The only reason this dashboard is rendering correctly is because 
-  ? it renders each time the date changes. The way i"m currently doing 
-  ? this seems expensive.
-  */
-
   //sets init to be either the query string or the current date
   const initDate = search ? new URLSearchParams(search).get("date") : today();
-
-  /*
-  ! Currently component really only works because of this here, dashboard 
-  ! button will not render the page correctly without this if I try to go
-  ! to it after going to a previous or next date
-  */
-
-  setDate(initDate);
+  const [date, setDate] = useState(initDate);
 
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
-  const [tables, setTables] = useState([]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    async function getTables() {
-      try {
-        await axios
-          .get(`http://localhost:5001/tables`, {
-            signal: abortController.signal,
-          })
-          .then((response) => setTables(response.data.data));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    getTables();
-    return () => {
-      console.log("cleanup");
-      abortController.abort(); // Cancels any pending request or response
-    };
-  }, []);
 
   useEffect(() => {
     async function getReservations() {
@@ -78,25 +42,6 @@ function Dashboard({ date, setDate }) {
     getReservations();
   }, [date]);
 
-  /*
-  * Component was originally rendered using this provided function
-  *
-  *function loadDashboard() {
-  * console.log("load");
-  *  const abortController = new AbortController();
-  *  setReservationsError(null);
-  *  listReservations(date, abortController.signal)
-  *    .then(setReservations)
-  *    .catch(setReservationsError);
-  *  return () => abortController.abort();
-  }
-*/
-
-  /*
-  ? I dont feel like I need to push to history and setDate for this page 
-  ? to rerender. Shouldn't the routing handle it if there is a query string
-  ? or not?
-  */
   const prevOnClick = (event) => {
     event.preventDefault();
     const previousDate = previous(date);

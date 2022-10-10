@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
 import ReservationForm from "../new-reservations/ReservationForm";
 import TableForm from "../new-table/TableForm";
 import SeatingForm from "../seating/SeatingForm";
-import { today } from "../utils/date-time";
 import NotFound from "./NotFound";
-import axios from "axios";
 
 /**
  * Defines all the routes for the application.
@@ -16,8 +14,6 @@ import axios from "axios";
  * @returns {JSX.Element}
  */
 function Routes() {
-  const [date, setDate] = useState(today());
-
   return (
     <Switch>
       <Route exact={true} path="/">
@@ -27,7 +23,7 @@ function Routes() {
         <Redirect to={"/dashboard"} />
       </Route>
       <Route path="/dashboard">
-        <Dashboard date={date} setDate={setDate} />
+        <Dashboard />
       </Route>
       <Route path="/reservations/new">
         <ReservationForm />
