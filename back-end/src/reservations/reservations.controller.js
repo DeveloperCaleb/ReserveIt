@@ -17,7 +17,43 @@ const validProperties = [
   "reservation_date",
   "reservation_time",
   "people",
+  "status",
 ];
+
+async function reservationExist(req, res, next) {
+  const { reservation_id } = req.params;
+
+  const response = await reservationsService.getReservation(reservation_id);
+  res.locals.reservation = response[0];
+
+  if (res.locals.reservation) {
+    return next();
+  } else {
+    return next({
+      status: 404,
+      message: `reservation ${reservation_id} does not exist`,
+    });
+  }
+}
+
+function hasValidStatus(req, res, next) {
+  const { status } = res.locals.reservation;
+  const requestStatus = req.body.data.status;
+
+  if (requestStatus === "unknown" || status === "finished") {
+    return next({
+      status: 400,
+      message: `status cannot be unknown or finished`,
+    });
+  } else if (status === "seated" && requestStatus === "seated") {
+    return next({
+      status: 400,
+      message: `reservation ${res.locals.reservation.reservation_id} cannot be seated`,
+    });
+  } else {
+    return next();
+  }
+}
 
 function hasValidFields(req, res, next) {
   const { data } = req.body;
@@ -87,6 +123,8 @@ function hasValidData(req, res, next) {
       key,
       () => selectedDate === todaysDate && selectedTime < currentTimeFormatted
     );
+    validate(errors, key, () => key === "status" && value === "seated");
+    validate(errors, key, () => key === "status" && value === "finished");
   }
 
   if (errors.has("reservation_date")) {
@@ -104,127 +142,6 @@ function hasValidData(req, res, next) {
   }
   return next();
 }
-
-/*function hasValidEntries(req, res, next) {
-  const { data = {} } = req.body;
-
-  const bodyValues = Object.entries(data);
-
-  const invalidEntries = bodyValues.filter((field) => {
-    if (!field[1] || (field[0] === "people" && typeof field[1] === "string")) {
-      return field[0];
-    }
-  });
-
-  if (invalidEntries.length === 0) {
-    return next();
-  } else {
-    return next({
-      status: 400,
-      message: `Invalid field(s): ${invalidEntries.join(", ")}`,
-    });
-  }
-}*/
-
-/*function hasValidDate(req, res, next) {
-  const validFormat = /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/gm;
-  const { data } = req.body;
-
-  const selectedDate = data.reservation_date.split("-");
-
-  const selectedDateFormatted = new Date(
-    selectedDate[0],
-    selectedDate[1] - 1,
-    selectedDate[2]
-  );
-
-  const todaysDate = today().split("-");
-  const todaysDateFormatted = new Date(
-    todaysDate[0],
-    todaysDate[1] - 1,
-    todaysDate[2]
-  );
-
-  if (
-    data.reservation_date.match(validFormat) &&
-    selectedDateFormatted.getDay() !== 2 &&
-    selectedDateFormatted >= todaysDateFormatted
-  ) {
-    return next();
-  } else if (!data.reservation_date.match(validFormat)) {
-    return next({
-      status: 400,
-      message: `Invalid field(s): reservation_date`,
-    });
-  } else if (selectedDateFormatted.getDay() == 2) {
-    return next({
-      status: 400,
-      message: `Invalid date: closed on Tuesdays`,
-    });
-  } else if (selectedDateFormatted < todaysDateFormatted) {
-    return next({
-      status: 400,
-      message: `Invalid date: reservation must be for today or in the future`,
-    });
-  }
-}*/
-
-/*function hasValidTime(req, res, next) {
-  const validFormat = /^[0-9][0-9]:[0-9][0-9]/gm;
-  const { data } = req.body;
-
-  const selectedTime = data.reservation_time.split(":");
-
-  const date = new Date();
-  const hour = date.getHours();
-  const minutes = date.getMinutes();
-
-  if (!data.reservation_time.match(validFormat)) {
-    return next({
-      status: 400,
-      message: `Invalid field(s): reservation_time`,
-    });
-  } else if (
-    parseInt(selectedTime[0]) < 10 ||
-    (parseInt(selectedTime[0]) <= 10 && parseInt(selectedTime[1]) < 30)
-  ) {
-    return next({
-      status: 400,
-      message: "Not opened until 10:30AM!",
-    });
-  } else if (
-    parseInt(selectedTime[0]) > 21 ||
-    (parseInt(selectedTime[0]) >= 21 && parseInt(selectedTime[1]) > 29)
-  ) {
-    return next({
-      status: 400,
-      message: "Too soon to closing. Closed at 10:30PM!",
-    });
-  } else if (
-    parseInt(selectedTime[0]) <= hour ||
-    (parseInt(selectedTime[0]) <= hour && parseInt(selectedTime[1]) <= minutes)
-  ) {
-    return next({
-      status: 400,
-      message: "Reservation must be in the future!",
-    });
-  }
-
-  return next();
-}*/
-
-/*function peopleIsANumber(req, res, next) {
-  const { data } = req.body;
-
-  if (!isNaN(data.people)) {
-    return next();
-  } else {
-    return next({
-      status: 400,
-      message: `Invalid field(s): people is not a number`,
-    });
-  }
-}*/
 
 //* Handlers
 async function listReservationsByDate(req, res) {
@@ -276,8 +193,26 @@ async function getReservation(req, res, next) {
   }
 }
 
+async function updateStatus(req, res, next) {
+  const { reservation_id } = req.params;
+  const { status } = req.body.data;
+
+  try {
+    const response = await reservationsService.updateStatus(
+      reservation_id,
+      status
+    );
+    const data = response[0];
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error });
+  }
+}
+
 module.exports = {
   listReservationsByDate,
   create: [hasValidFields, hasValidData, create],
   getReservation,
+  updateStatus: [reservationExist, hasValidStatus, updateStatus],
 };

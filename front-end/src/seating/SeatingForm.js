@@ -42,7 +42,7 @@ function SeatingForm() {
       console.log("cleanup");
       abortController.abort(); // Cancels any pending request or response
     };
-  }, []);
+  }, [reservation_id]);
 
   const handleChange = (event) => {
     const { value } = event.target;
@@ -59,6 +59,14 @@ function SeatingForm() {
             data: { reservation_id: reservation.reservation_id },
           })
           .then(function (response) {
+            console.log(response);
+          });
+
+        await axios
+          .put(`http://localhost:5001/reservations/${reservation_id}/status`, {
+            data: { status: "seated" },
+          })
+          .then((response) => {
             console.log(response);
             history.push("/dashboard");
           });

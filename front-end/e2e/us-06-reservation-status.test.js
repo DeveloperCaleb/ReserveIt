@@ -1,10 +1,15 @@
 const puppeteer = require("puppeteer");
-const { setDefaultOptions } = require('expect-puppeteer');
+const { setDefaultOptions } = require("expect-puppeteer");
 const fs = require("fs");
 const fsPromises = fs.promises;
 
 const { containsText } = require("./utils");
-const { createReservation, createTable, seatReservation } = require("./api");
+const {
+  createReservation,
+  createTable,
+  seatReservation,
+  seatReservationStatus,
+} = require("./api");
 
 const baseURL = process.env.BASE_URL || "http://localhost:3000";
 
@@ -76,7 +81,8 @@ describe("US-06 - Reservation status - E2E", () => {
         fullPage: true,
       });
 
-      await seatReservation(reservation.reservation_id, table.table_id);
+      //await seatReservation(reservation.reservation_id, table.table_id);
+      await seatReservationStatus(reservation.reservation_id, "seated");
 
       await page.reload({ waitUntil: "networkidle0" });
 

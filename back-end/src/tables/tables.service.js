@@ -36,6 +36,10 @@ function updateReservationId(table_id) {
     .update({ reservation_id: null });
 }
 
+function getTableWithReservation(reservation_id) {
+  return knex("tables").select("*").where({ reservation_id: reservation_id });
+}
+
 module.exports = {
   list,
   create,
@@ -43,4 +47,5 @@ module.exports = {
   getReservation,
   getTable,
   updateReservationId,
+  getTableWithReservation,
 };

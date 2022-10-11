@@ -9,7 +9,8 @@ function TableCards({ tables }) {
   const handleClick = async (event) => {
     event.preventDefault();
 
-    const tableId = event.target.value;
+    const tableId = event.target.value[0];
+    const resId = event.target.value[2];
 
     if (
       window.confirm(
@@ -19,6 +20,9 @@ function TableCards({ tables }) {
       try {
         await axios.delete(`http://localhost:5001/tables/${tableId}/seat`);
         history.go(0);
+        await axios.put(`http://localhost:5001/reservations/${resId}/status`, {
+          data: { status: "finished" },
+        });
       } catch (error) {
         console.error(error);
       }
@@ -27,7 +31,7 @@ function TableCards({ tables }) {
 
   return tables.map((table, index) => {
     return (
-      <div>
+      <div key={table.table_id}>
         {table.reservation_id !== null ? (
           <Card className="bg-danger">
             <Card.Body>
@@ -39,7 +43,7 @@ function TableCards({ tables }) {
               type="button"
               onClick={handleClick}
               data-table-id-finish={table.table_id}
-              value={table.table_id}
+              value={[table.table_id, table.reservation_id]}
             >
               Finished
             </button>

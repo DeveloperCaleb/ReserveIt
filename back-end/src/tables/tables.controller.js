@@ -117,6 +117,21 @@ async function tableExistsAndHasReservation(req, res, next) {
   return next();
 }
 
+async function reservationCantBeSeated(req, res, next) {
+  const { reservation_id } = req.body.data;
+  const response = await tablesService.getTableWithReservation(reservation_id);
+  const data = response[0];
+
+  if (data) {
+    return next({
+      status: 400,
+      message: `reservation ${reservation_id} cannot be seated`,
+    });
+  } else {
+    return next();
+  }
+}
+
 //route handlers
 async function list(req, res, next) {
   const data = await tablesService.list();
@@ -147,7 +162,6 @@ async function update(req, res, next) {
 
 async function updateReservationId(req, res, next) {
   const { table_id } = req.params;
-  console.log(table_id);
   await tablesService.updateReservationId(table_id);
   res.sendStatus(200);
 }
@@ -155,6 +169,6 @@ async function updateReservationId(req, res, next) {
 module.exports = {
   list,
   create: [hasValidFields, hasValidData, create],
-  update: [isValidReservation, validCapacity, update],
+  update: [isValidReservation, validCapacity, reservationCantBeSeated, update],
   delete: [tableExistsAndHasReservation, updateReservationId],
 };
