@@ -80,7 +80,7 @@ function SeatingForm() {
 
   const tableOptions = tables.map((table, index) => {
     return (
-      <>
+      <div key={table.table_id}>
         {table.capacity < reservation.people ||
         table.reservation_id !== null ||
         table.table_name.includes("Bar") ? (
@@ -92,7 +92,7 @@ function SeatingForm() {
             {table.table_name} - {table.capacity}
           </option>
         )}
-      </>
+      </div>
     );
   });
 

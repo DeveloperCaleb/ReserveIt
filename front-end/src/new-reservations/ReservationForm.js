@@ -20,6 +20,7 @@ function ReservationForm() {
     reservation_date: "",
     reservation_time: "",
     people: "",
+    status: "booked",
   };
 
   const [formData, setFormData] = useState({ ...initialFormState });
@@ -84,6 +85,7 @@ function ReservationForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log(formData);
 
     try {
       if (validation()) {

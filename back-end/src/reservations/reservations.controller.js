@@ -145,7 +145,16 @@ function hasValidData(req, res, next) {
 
 //* Handlers
 async function listReservationsByDate(req, res) {
-  if (req.query.date) {
+  if (req.query.mobile_number) {
+    const { mobile_number } = req.query;
+    try {
+      const data = await reservationsService.search(mobile_number);
+      res.status(200).json({ data });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json(error);
+    }
+  } else if (req.query.date) {
     const { date } = req.query;
     try {
       const data = await reservationsService.listReservationsByDate(date);
@@ -208,6 +217,11 @@ async function updateStatus(req, res, next) {
     console.error(error);
     res.status(400).json({ error });
   }
+}
+
+async function search(req, res, next) {
+  const { mobile_number } = req.query;
+  console.log(mobile_number);
 }
 
 module.exports = {
