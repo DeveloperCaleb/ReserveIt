@@ -82,6 +82,7 @@ describe("US-06 - Reservation status - E2E", () => {
       });
 
       //await seatReservation(reservation.reservation_id, table.table_id);
+      //Added
       await seatReservationStatus(reservation.reservation_id, "seated");
 
       await page.reload({ waitUntil: "networkidle0" });

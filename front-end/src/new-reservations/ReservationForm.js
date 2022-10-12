@@ -1,14 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { today } from "../utils/date-time";
-const axios = require("axios");
-
-/**
- * * - Important information
- * ! - This isn't working
- * ? - I have a question about this
- * TODO - Needs completed
- */
+import axios from "axios";
+import ErrorAlert from "../layout/ErrorAlert";
 
 function ReservationForm() {
   const history = useHistory();
@@ -20,11 +14,11 @@ function ReservationForm() {
     reservation_date: "",
     reservation_time: "",
     people: "",
-    status: "booked",
   };
 
   const [formData, setFormData] = useState({ ...initialFormState });
   const [error, setError] = useState("");
+  const [postError, setPostError] = useState(null);
 
   const handleChange = ({ target }) => {
     if (target.name === "people") {
@@ -85,19 +79,18 @@ function ReservationForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(formData);
 
     try {
       if (validation()) {
         await axios
           .post("http://localhost:5001/reservations", { data: formData })
           .then(function (response) {
-            console.log(response);
             history.push(`/dashboard?date=${formData.reservation_date}`);
           });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      setPostError(error);
     }
   };
 
@@ -189,6 +182,7 @@ function ReservationForm() {
       <p className={error !== "" ? "alert alert-danger" : ""}>
         {error !== ""} {error}
       </p>
+      <ErrorAlert error={postError} />
     </div>
   );
 }

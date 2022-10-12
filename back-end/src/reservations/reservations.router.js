@@ -12,7 +12,10 @@ router
   .get(controller.listReservationsByDate)
   .post(controller.create);
 
-router.route("/:reservation_Id").get(controller.getReservation);
+router
+  .route("/:reservation_Id")
+  .get(controller.getReservation)
+  .put(controller.updateReservation);
 
 router.route("/:reservation_id/status").put(controller.updateStatus);
 

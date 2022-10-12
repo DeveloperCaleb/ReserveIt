@@ -25,7 +25,7 @@ function getReservation(reservation_Id) {
 }
 
 function getTable(table_id) {
-  return knex("tables").select("*").where({ table_id: table_id });
+  return knex("tables").select("*").where({ table_id });
 }
 
 //I can't just delete a single column value

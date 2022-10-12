@@ -17,14 +17,35 @@ const validProperties = [
   "reservation_date",
   "reservation_time",
   "people",
-  "status",
 ];
 
 async function reservationExist(req, res, next) {
   const { reservation_id } = req.params;
+  const { reservation_Id } = req.params;
 
-  const response = await reservationsService.getReservation(reservation_id);
-  res.locals.reservation = response[0];
+  if (reservation_Id) {
+    try {
+      const response = await reservationsService.getReservation(reservation_Id);
+      res.locals.reservation = response[0];
+    } catch (error) {
+      console.error(error);
+      return next({
+        status: 400,
+        message: error,
+      });
+    }
+  } else {
+    try {
+      const response = await reservationsService.getReservation(reservation_id);
+      res.locals.reservation = response[0];
+    } catch (error) {
+      console.error(error);
+      return next({
+        status: 400,
+        message: error,
+      });
+    }
+  }
 
   if (res.locals.reservation) {
     return next();
@@ -152,7 +173,7 @@ async function listReservationsByDate(req, res) {
       res.status(200).json({ data });
     } catch (error) {
       console.error(error);
-      res.status(400).json(error);
+      res.status(400).json({ error });
     }
   } else if (req.query.date) {
     const { date } = req.query;
@@ -161,7 +182,7 @@ async function listReservationsByDate(req, res) {
       res.status(200).json({ data });
     } catch (error) {
       console.error(error);
-      res.status(400).json(error);
+      res.status(400).json({ error });
     }
   } else {
     const date = today();
@@ -171,7 +192,7 @@ async function listReservationsByDate(req, res) {
       res.status(200).json({ data });
     } catch (error) {
       console.error(error);
-      res.status(400).json(error);
+      res.status(400).json({ error });
     }
   }
 }
@@ -182,7 +203,7 @@ async function create(req, res, next) {
     res.status(201).json({ data });
   } catch (error) {
     console.error(error);
-    res.status(400).json(error);
+    res.status(400).json({ error });
   }
 }
 
@@ -219,9 +240,20 @@ async function updateStatus(req, res, next) {
   }
 }
 
-async function search(req, res, next) {
-  const { mobile_number } = req.query;
-  console.log(mobile_number);
+async function updateReservation(req, res, next) {
+  const { reservation_Id } = req.params;
+  const updatedReservationData = req.body.data;
+  try {
+    const response = await reservationsService.updateReservation(
+      reservation_Id,
+      updatedReservationData
+    );
+    const data = response[0];
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error });
+  }
 }
 
 module.exports = {
@@ -229,4 +261,10 @@ module.exports = {
   create: [hasValidFields, hasValidData, create],
   getReservation,
   updateStatus: [reservationExist, hasValidStatus, updateStatus],
+  updateReservation: [
+    reservationExist,
+    hasValidFields,
+    hasValidData,
+    updateReservation,
+  ],
 };

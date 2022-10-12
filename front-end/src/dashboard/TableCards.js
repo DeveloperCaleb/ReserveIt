@@ -1,16 +1,18 @@
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import Card from "react-bootstrap/Card";
 import { useHistory } from "react-router-dom";
+import ErrorAlert from "../layout/ErrorAlert";
 
 function TableCards({ tables }) {
   const history = useHistory();
+  const [error, setError] = useState(null);
 
   const handleClick = async (event) => {
     event.preventDefault();
 
-    const tableId = event.target.value[0];
-    const resId = event.target.value[2];
+    const tableId = event.target.dataset.tableIdFinish;
+    const resId = event.target.value;
 
     if (
       window.confirm(
@@ -19,12 +21,14 @@ function TableCards({ tables }) {
     ) {
       try {
         await axios.delete(`http://localhost:5001/tables/${tableId}/seat`);
-        history.go(0);
+
         await axios.put(`http://localhost:5001/reservations/${resId}/status`, {
           data: { status: "finished" },
         });
+        history.go(0);
       } catch (error) {
         console.error(error);
+        setError(error);
       }
     }
   };
@@ -43,7 +47,7 @@ function TableCards({ tables }) {
               type="button"
               onClick={handleClick}
               data-table-id-finish={table.table_id}
-              value={[table.table_id, table.reservation_id]}
+              value={table.reservation_id}
             >
               Finished
             </button>
@@ -65,6 +69,7 @@ function TableCards({ tables }) {
             </button>
           </Card>
         )}
+        <ErrorAlert error={error} />
       </div>
     );
   });

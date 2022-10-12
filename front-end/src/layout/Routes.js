@@ -1,6 +1,7 @@
 import React from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
+import EditReservationForm from "../edit-reservation/EditReservationForm";
 import ReservationForm from "../new-reservations/ReservationForm";
 import TableForm from "../new-table/TableForm";
 import SearchForm from "../search/SearchForm";
@@ -34,6 +35,9 @@ function Routes() {
       </Route>
       <Route path="/reservations/:reservation_id/seat">
         <SeatingForm />
+      </Route>
+      <Route path="/reservations/:reservation_id/edit">
+        <EditReservationForm />
       </Route>
       <Route path="/search">
         <SearchForm />

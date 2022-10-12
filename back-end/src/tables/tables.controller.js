@@ -79,63 +79,101 @@ async function isValidReservation(req, res, next) {
 
 async function validCapacity(req, res, next) {
   const { table_id } = req.params;
-  const reservation = res.locals.reservation;
-  const table = await tablesService
-    .getTable(table_id)
-    .then((response) => response[0]);
-
-  if (
-    table === [] ||
-    table.reservation_id !== null ||
-    table.capacity < reservation.people
-  ) {
+  if (isNaN(parseInt(table_id))) {
     return next({
       status: 400,
-      message: `Invalid field(s): Table doesn't exist, capacity is too small, or is occupied.}`,
+      message: `Invalid table_id`,
     });
   }
-  return next();
+  const reservation = res.locals.reservation;
+  try {
+    const table = await tablesService
+      .getTable(table_id)
+      .then((response) => response[0]);
+
+    if (
+      table === [] ||
+      table.reservation_id !== null ||
+      table.capacity < reservation.people
+    ) {
+      return next({
+        status: 400,
+        message: `Invalid field(s): Table doesn't exist, capacity is too small, or is occupied.`,
+      });
+    }
+    return next();
+  } catch (error) {
+    console.error(error);
+    return next({
+      status: 400,
+      message: error,
+    });
+  }
 }
 
 async function tableExistsAndHasReservation(req, res, next) {
   const { table_id } = req.params;
-  const table = await tablesService
-    .getTable(table_id)
-    .then((response) => response[0]);
+  try {
+    const table = await tablesService
+      .getTable(table_id)
+      .then((response) => response[0]);
 
-  if (!table) {
-    return next({
-      status: 404,
-      message: `Table ${table_id} does not exist.`,
-    });
-  } else if (table.reservation_id === null) {
+    if (!table) {
+      return next({
+        status: 404,
+        message: `Table ${table_id} does not exist.`,
+      });
+    } else if (table.reservation_id === null) {
+      return next({
+        status: 400,
+        message: `not occupied`,
+      });
+    }
+    return next();
+  } catch (error) {
+    console.error(error);
     return next({
       status: 400,
-      message: `not occupied`,
+      message: error,
     });
   }
-  return next();
 }
 
 async function reservationCantBeSeated(req, res, next) {
   const { reservation_id } = req.body.data;
-  const response = await tablesService.getTableWithReservation(reservation_id);
-  const data = response[0];
 
-  if (data) {
+  try {
+    const response = await tablesService.getTableWithReservation(
+      reservation_id
+    );
+    const data = response[0];
+
+    if (data) {
+      return next({
+        status: 400,
+        message: `reservation ${reservation_id} cannot be seated`,
+      });
+    } else {
+      return next();
+    }
+  } catch (error) {
+    console.log(error);
     return next({
       status: 400,
-      message: `reservation ${reservation_id} cannot be seated`,
+      message: error,
     });
-  } else {
-    return next();
   }
 }
 
 //route handlers
 async function list(req, res, next) {
-  const data = await tablesService.list();
-  res.status(200).json({ data });
+  try {
+    const data = await tablesService.list();
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error });
+  }
 }
 
 async function create(req, res, next) {
@@ -151,6 +189,7 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   const { table_id } = req.params;
   const { reservation_id } = req.body.data;
+
   try {
     const data = await tablesService.update(table_id, reservation_id);
     res.status(200).json({ data });
@@ -162,13 +201,18 @@ async function update(req, res, next) {
 
 async function updateReservationId(req, res, next) {
   const { table_id } = req.params;
-  await tablesService.updateReservationId(table_id);
-  res.sendStatus(200);
+  try {
+    await tablesService.updateReservationId(table_id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error });
+  }
 }
 
 module.exports = {
   list,
   create: [hasValidFields, hasValidData, create],
-  update: [isValidReservation, validCapacity, reservationCantBeSeated, update],
+  update: [isValidReservation, reservationCantBeSeated, validCapacity, update],
   delete: [tableExistsAndHasReservation, updateReservationId],
 };

@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import ErrorAlert from "../layout/ErrorAlert";
 
 function TableForm() {
   const history = useHistory();
@@ -10,6 +11,7 @@ function TableForm() {
   };
 
   const [formData, setFormData] = useState({ ...initialFormState });
+  const [postError, setPostError] = useState(null);
 
   const handleChange = ({ target }) => {
     if (target.name === "capacity") {
@@ -27,16 +29,15 @@ function TableForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(formData);
 
     await axios
       .post("http://localhost:5001/tables", { data: formData })
       .then(function (response) {
-        console.log(response);
         history.push("/dashboard");
       })
       .catch(function (error) {
-        console.log(error);
+        console.error(error);
+        setPostError(error);
       });
   };
 
@@ -64,6 +65,7 @@ function TableForm() {
             name="capacity"
             onChange={handleChange}
             value={formData.capacity}
+            min="1"
             required
           ></input>
         </label>
@@ -73,6 +75,7 @@ function TableForm() {
           Cancel
         </button>
       </form>
+      <ErrorAlert error={postError} />
     </div>
   );
 }

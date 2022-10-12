@@ -8,13 +8,6 @@ import ReservationCards from "./ReservationCards";
 import Tables from "./Tables";
 
 /**
- * * - Important information
- * ! - This isn't working
- * ? - I have a question about this
- * TODO - Needs completed
- */
-
-/**
  * Defines the dashboard page.
  * @returns {JSX.Element}
  */
@@ -30,16 +23,27 @@ function Dashboard() {
   const [reservationsError, setReservationsError] = useState(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     async function getReservations() {
-      await axios
-        .get(`http://localhost:5001/reservations?date=${date}`)
-        .then((response) => {
-          return setReservations(response.data.data);
-        })
-        .catch((e) => console.log(e));
+      try {
+        await axios
+          .get(`http://localhost:5001/reservations?date=${date}`, {
+            signal: abortController.signal,
+          })
+          .then((response) => {
+            return setReservations(response.data.data);
+          });
+      } catch (e) {
+        console.error(e);
+        setReservationsError("Unable to get reservations");
+      }
     }
 
     getReservations();
+    return () => {
+      abortController.abort(); // Cancels any pending request or response
+    };
   }, [date]);
 
   const prevOnClick = (event) => {

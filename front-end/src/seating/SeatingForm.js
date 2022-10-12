@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import { useHistory, useParams } from "react-router";
+import ErrorAlert from "../layout/ErrorAlert";
 
 function SeatingForm() {
   const history = useHistory();
@@ -10,18 +11,26 @@ function SeatingForm() {
   const [reservation, setReservation] = useState("");
   const [error, setError] = useState("");
   const [tables, setTables] = useState([]);
+  const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
     async function getTables() {
       try {
         await axios
-          .get(`http://localhost:5001/tables`)
+          .get(`http://localhost:5001/tables`, {
+            signal: abortController.signal,
+          })
           .then((response) => setTables(response.data.data));
       } catch (e) {
         console.error(e);
+        setApiError(e);
       }
     }
     getTables();
+    return () => {
+      abortController.abort(); // Cancels any pending request or response
+    };
   }, []);
 
   useEffect(() => {
@@ -35,11 +44,11 @@ function SeatingForm() {
           .then((response) => setReservation(response.data.data));
       } catch (e) {
         console.error(e);
+        setApiError(e);
       }
     }
     getReservation();
     return () => {
-      console.log("cleanup");
       abortController.abort(); // Cancels any pending request or response
     };
   }, [reservation_id]);
@@ -51,23 +60,18 @@ function SeatingForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(selected);
+
     try {
       if (selected !== "") {
-        await axios
-          .put(`http://localhost:5001/tables/${selected}/seat/`, {
-            data: { reservation_id: reservation.reservation_id },
-          })
-          .then(function (response) {
-            console.log(response);
-          });
+        await axios.put(`http://localhost:5001/tables/${selected}/seat/`, {
+          data: { reservation_id: reservation_id },
+        });
 
         await axios
           .put(`http://localhost:5001/reservations/${reservation_id}/status`, {
             data: { status: "seated" },
           })
           .then((response) => {
-            console.log(response);
             history.push("/dashboard");
           });
       } else {
@@ -75,50 +79,56 @@ function SeatingForm() {
       }
     } catch (error) {
       console.error(error);
+      setApiError(error);
     }
   };
 
   const tableOptions = tables.map((table, index) => {
-    return (
-      <div key={table.table_id}>
-        {table.capacity < reservation.people ||
-        table.reservation_id !== null ||
-        table.table_name.includes("Bar") ? (
-          <option disabled value={table}>
-            {table.table_name} - {table.capacity}
-          </option>
-        ) : (
-          <option value={table.table_id}>
-            {table.table_name} - {table.capacity}
-          </option>
-        )}
-      </div>
-    );
+    const isTableLargeEnough = table.capacity > reservation.people;
+    const isTableOpen = table.reservation_id === null;
+    const isTableABar = table.table_name.includes("Bar");
+
+    if (isTableLargeEnough && isTableOpen && !isTableABar) {
+      return (
+        <option value={table.table_id} key={table.table_id}>
+          {table.table_name} - {table.capacity}
+        </option>
+      );
+    } else {
+      return (
+        <option disabled value={table} key={table.table_id}>
+          {table.table_name} - {table.capacity}
+        </option>
+      );
+    }
   });
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <label htmlFor="seating">
-        Select a table to seat the reservation.
-        <br />
-        <select name="table_id" id="table_id" onChange={handleChange}>
-          <option value="" disabled selected>
-            Select your option
-          </option>
-          {tableOptions}
-        </select>
-        <div>
+    <div>
+      <Form onSubmit={handleSubmit}>
+        <label htmlFor="seating">
+          Select a table to seat the reservation.
           <br />
-          <p className={error !== "" ? "alert alert-danger" : ""}>
-            {error !== ""} {error}
-          </p>
-          <button type="submit">Submit</button>
-          <button type="button" onClick={() => history.goBack()}>
-            Cancel
-          </button>
-        </div>
-      </label>
-    </Form>
+          <select name="table_id" id="table_id" onChange={handleChange}>
+            <option value="" disabled selected>
+              Select your option
+            </option>
+            {tableOptions}
+          </select>
+          <div>
+            <br />
+            <p className={error !== "" ? "alert alert-danger" : ""}>
+              {error !== ""} {error}
+            </p>
+            <button type="submit">Submit</button>
+            <button type="button" onClick={() => history.goBack()}>
+              Cancel
+            </button>
+          </div>
+        </label>
+      </Form>
+      <ErrorAlert error={apiError} />
+    </div>
   );
 }
 

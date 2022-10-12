@@ -2,11 +2,13 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import SearchResults from "./SearchResults";
+import ErrorAlert from "../layout/ErrorAlert";
 
 function SearchForm() {
   const history = useHistory();
   const [number, setNumber] = useState("");
   const [searchResults, setSearchResults] = useState("");
+  const [error, setError] = useState(null);
 
   const handleChange = ({ target }) => {
     setNumber(target.value);
@@ -14,17 +16,23 @@ function SearchForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const abortController = new AbortController();
 
     try {
       await axios
-        .get(`http://localhost:5001/reservations?mobile_number=${number}`)
+        .get(`http://localhost:5001/reservations?mobile_number=${number}`, {
+          signal: abortController.signal,
+        })
         .then((response) => {
-          console.log(response.data.data);
           setSearchResults(response.data.data);
         });
     } catch (error) {
       console.error(error);
+      setError(error);
     }
+    return () => {
+      abortController.abort(); // Cancels any pending request or response
+    };
   };
 
   return (
@@ -54,6 +62,7 @@ function SearchForm() {
           <SearchResults searchResults={searchResults} />
         )}
       </div>
+      <ErrorAlert error={error} />
     </div>
   );
 }
