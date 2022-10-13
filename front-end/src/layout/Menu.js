@@ -1,7 +1,6 @@
 import React from "react";
 
-import { Link } from "react-router-dom";
-import { useHistory, useLocation } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 /**
  * Defines the menu for this application.
  *
