@@ -20,11 +20,16 @@ function TableCards({ tables }) {
       )
     ) {
       try {
-        await axios.delete(`http://localhost:5001/tables/${tableId}/seat`);
+        await axios.delete(
+          `${process.env.REACT_APP_API_BASE_URL}/tables/${tableId}/seat`
+        );
 
-        await axios.put(`http://localhost:5001/reservations/${resId}/status`, {
-          data: { status: "finished" },
-        });
+        await axios.put(
+          `${process.env.REACT_APP_API_BASE_URL}/reservations/${resId}/status`,
+          {
+            data: { status: "finished" },
+          }
+        );
         history.go(0);
       } catch (error) {
         console.error(error);

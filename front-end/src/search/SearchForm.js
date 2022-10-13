@@ -20,9 +20,12 @@ function SearchForm() {
 
     try {
       await axios
-        .get(`http://localhost:5001/reservations?mobile_number=${number}`, {
-          signal: abortController.signal,
-        })
+        .get(
+          `${process.env.REACT_APP_API_BASE_URL}/reservations?mobile_number=${number}`,
+          {
+            signal: abortController.signal,
+          }
+        )
         .then((response) => {
           setSearchResults(response.data.data);
         });

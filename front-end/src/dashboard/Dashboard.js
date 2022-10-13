@@ -28,9 +28,12 @@ function Dashboard() {
     async function getReservations() {
       try {
         await axios
-          .get(`http://localhost:5001/reservations?date=${date}`, {
-            signal: abortController.signal,
-          })
+          .get(
+            `${process.env.REACT_APP_API_BASE_URL}/reservations?date=${date}`,
+            {
+              signal: abortController.signal,
+            }
+          )
           .then((response) => {
             return setReservations(response.data.data);
           });

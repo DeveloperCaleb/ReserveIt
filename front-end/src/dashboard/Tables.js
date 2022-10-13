@@ -12,7 +12,7 @@ function Tables() {
     async function getTables() {
       try {
         await axios
-          .get(`http://localhost:5001/tables`, {
+          .get(`${process.env.REACT_APP_API_BASE_URL}/tables`, {
             signal: abortController.signal,
           })
           .then((response) => setTables(response.data.data));

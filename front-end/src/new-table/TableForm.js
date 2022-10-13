@@ -31,7 +31,7 @@ function TableForm() {
     event.preventDefault();
 
     await axios
-      .post("http://localhost:5001/tables", { data: formData })
+      .post(`${process.env.REACT_APP_API_BASE_URL}/tables`, { data: formData })
       .then(function (response) {
         history.push("/dashboard");
       })

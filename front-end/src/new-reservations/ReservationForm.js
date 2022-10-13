@@ -83,7 +83,9 @@ function ReservationForm() {
     try {
       if (validation()) {
         await axios
-          .post("http://localhost:5001/reservations", { data: formData })
+          .post(`${process.env.REACT_APP_API_BASE_URL}/reservations`, {
+            data: formData,
+          })
           .then(function (response) {
             history.push(`/dashboard?date=${formData.reservation_date}`);
           });

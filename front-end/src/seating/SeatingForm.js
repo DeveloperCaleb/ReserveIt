@@ -18,7 +18,7 @@ function SeatingForm() {
     async function getTables() {
       try {
         await axios
-          .get(`http://localhost:5001/tables`, {
+          .get(`${process.env.REACT_APP_API_BASE_URL}/tables`, {
             signal: abortController.signal,
           })
           .then((response) => setTables(response.data.data));
@@ -38,9 +38,12 @@ function SeatingForm() {
     async function getReservation() {
       try {
         await axios
-          .get(`http://localhost:5001/reservations/${reservation_id}`, {
-            signal: abortController.signal,
-          })
+          .get(
+            `${process.env.REACT_APP_API_BASE_URL}/reservations/${reservation_id}`,
+            {
+              signal: abortController.signal,
+            }
+          )
           .then((response) => setReservation(response.data.data));
       } catch (e) {
         console.error(e);
@@ -63,14 +66,20 @@ function SeatingForm() {
 
     try {
       if (selected !== "") {
-        await axios.put(`http://localhost:5001/tables/${selected}/seat/`, {
-          data: { reservation_id: reservation_id },
-        });
+        await axios.put(
+          `${process.env.REACT_APP_API_BASE_URL}/tables/${selected}/seat/`,
+          {
+            data: { reservation_id: reservation_id },
+          }
+        );
 
         await axios
-          .put(`http://localhost:5001/reservations/${reservation_id}/status`, {
-            data: { status: "seated" },
-          })
+          .put(
+            `${process.env.REACT_APP_API_BASE_URL}/reservations/${reservation_id}/status`,
+            {
+              data: { status: "seated" },
+            }
+          )
           .then((response) => {
             history.push("/dashboard");
           });

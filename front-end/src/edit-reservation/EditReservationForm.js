@@ -17,9 +17,12 @@ function EditReservationForm() {
     async function getReservation() {
       try {
         await axios
-          .get(`http://localhost:5001/reservations/${reservation_id}`, {
-            signal: abortController.signal,
-          })
+          .get(
+            `${process.env.REACT_APP_API_BASE_URL}/reservations/${reservation_id}`,
+            {
+              signal: abortController.signal,
+            }
+          )
           .then((response) => {
             setFormData(response.data.data);
           });
@@ -99,9 +102,12 @@ function EditReservationForm() {
     try {
       if (validation()) {
         await axios
-          .put(`http://localhost:5001/reservations/${reservation_id}`, {
-            data: formData,
-          })
+          .put(
+            `${process.env.REACT_APP_API_BASE_URL}/reservations/${reservation_id}`,
+            {
+              data: formData,
+            }
+          )
           .then(function (response) {
             history.push(`/dashboard?date=${formData.reservation_date}`);
           });

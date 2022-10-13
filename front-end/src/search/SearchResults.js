@@ -20,7 +20,7 @@ function SearchResults({ searchResults }) {
       ) {
         try {
           await axios.put(
-            `http://localhost:5001/reservations/${reservation_id}/status`,
+            `${process.env.REACT_APP_API_BASE_URL}/reservations/${reservation_id}/status`,
             {
               data: { status: "cancelled" },
             }
