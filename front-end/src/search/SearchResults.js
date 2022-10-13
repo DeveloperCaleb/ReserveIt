@@ -9,7 +9,7 @@ function SearchResults({ searchResults }) {
   const history = useHistory();
   const [error, setError] = useState(null);
 
-  return searchResults.map((result) => {
+  const searchResultCards = searchResults.map((result) => {
     const handleClick = async ({ target }) => {
       const reservation_id = target.value[0];
 
@@ -66,10 +66,16 @@ function SearchResults({ searchResults }) {
             </Button>
           </Card.Body>
         </Card>
-        <ErrorAlert error={error} />
       </div>
     );
   });
+
+  return (
+    <div>
+      {searchResultCards}
+      <ErrorAlert error={error} />
+    </div>
+  );
 }
 
 export default SearchResults;

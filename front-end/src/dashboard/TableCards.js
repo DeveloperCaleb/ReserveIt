@@ -38,7 +38,7 @@ function TableCards({ tables }) {
     }
   };
 
-  return tables.map((table, index) => {
+  const tableCards = tables.map((table, index) => {
     return (
       <div key={table.table_id}>
         {table.reservation_id !== null ? (
@@ -74,10 +74,15 @@ function TableCards({ tables }) {
             </button>
           </Card>
         )}
-        <ErrorAlert error={error} />
       </div>
     );
   });
+
+  return (
+    <div>
+      {tableCards} <ErrorAlert error={error} />
+    </div>
+  );
 }
 
 export default TableCards;

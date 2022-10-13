@@ -93,7 +93,7 @@ function SeatingForm() {
   };
 
   const tableOptions = tables.map((table, index) => {
-    const isTableLargeEnough = table.capacity > reservation.people;
+    const isTableLargeEnough = table.capacity >= reservation.people;
     const isTableOpen = table.reservation_id === null;
     const isTableABar = table.table_name.includes("Bar");
 
