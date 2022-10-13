@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const controller = require("./tables.controller");
 const cors = require("cors");
-router.use(cors());
 
 router.route("/").get(controller.list).post(controller.create);
 
