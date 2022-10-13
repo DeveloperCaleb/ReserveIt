@@ -33,7 +33,7 @@ The "Edit" button will bring the user to a form that will be filled with the sel
 
 ##### Cancel reservation
 
-![Confirm Cancel](/screenshots/cancel_confirm.png "Confirm Cancel")
+![Confirm Cancel](/screenshots/cancel_confirm.png "Confirm Cancel")  
 The "Cancel" button will display the following confirmation and prompt the user that they would like to cancel the reservation.
 
 ---
