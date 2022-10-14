@@ -1,14 +1,16 @@
 import React from "react";
 import ErrorAlert from "../layout/ErrorAlert";
+import { useHistory } from "react-router-dom";
 
 function ResForm({
   formData,
   handleChange,
   handleSubmit,
-  history,
+
   error,
   axiosError,
 }) {
+  const history = useHistory();
   return (
     <div>
       <form name="newReservation" onSubmit={handleSubmit}>

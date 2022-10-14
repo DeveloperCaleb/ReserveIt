@@ -49,18 +49,16 @@ function Dashboard() {
     };
   }, [date]);
 
-  const prevOnClick = (event) => {
-    event.preventDefault();
+  const prevOnClick = async (event) => {
     const previousDate = previous(date);
+    setDate(previousDate);
     history.push(`/dashboard?date=${previousDate}`);
-    return setDate(previousDate);
   };
 
-  const nextOnClick = (event) => {
-    event.preventDefault();
+  const nextOnClick = async (event) => {
     const nextDate = next(date);
+    setDate(nextDate);
     history.push(`/dashboard?date=${nextDate}`);
-    return setDate(nextDate);
   };
 
   return (

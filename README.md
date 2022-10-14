@@ -6,6 +6,16 @@
 
 ---
 
+### Set Up
+
+## Fork and clone and then run npm install in the root. Copy the .env.sample file to set up environments.
+
+---
+
+### Testing
+
+## To run test run the command npm run test from the root. This will first run all front-end test sequentially followed by all the backend test.
+
 ### Navigation Buttons
 
 ---

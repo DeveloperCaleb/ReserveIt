@@ -68,6 +68,10 @@ function EditReservationForm() {
       todaysDate[2]
     );
 
+    const yearMatchesToday = selectedDate[0] === todaysDate[0];
+    const monthMatchesToday = selectedDate[1] === todaysDate[1];
+    const dayMatchesToday = selectedDate[2] === todaysDate[2];
+
     const selectedTime = formData.reservation_time;
 
     const currentTime = new Date();
@@ -81,15 +85,17 @@ function EditReservationForm() {
       return setError(
         "Reservation must be today or in the future. Closed on Tuesday!"
       );
+    } else if (
+      yearMatchesToday &&
+      monthMatchesToday &&
+      dayMatchesToday &&
+      selectedTime < currentTimeFormatted
+    ) {
+      return setError(" Reservation must be in the future!");
     } else if (selectedTime < "10:30") {
       return setError("Not opened until 10:30AM!");
     } else if (selectedTime > "21:29") {
       return setError("Too soon to closing. Closed at 10:30PM!");
-    } else if (
-      selectedDate === todaysDate &&
-      selectedTime < currentTimeFormatted
-    ) {
-      return setError(" Reservation must be in the future!");
     } else if (formData.status !== "booked") {
       return setError("Reservation must have a status of booked");
     }
