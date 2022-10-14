@@ -1,9 +1,8 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { today } from "../utils/date-time";
-import ErrorAlert from "../layout/ErrorAlert";
 import ResForm from "../res-form/ResForm";
+import { today } from "../utils/date-time";
 
 function EditReservationForm() {
   const history = useHistory();
